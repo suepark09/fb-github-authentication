@@ -3,6 +3,10 @@ const app = express();
 
 app.get('/', (req, res) => res.sendFile('auth.html', { root : __dirname}));
 
+app.post("/webhooks/github", function (req, res) {
+    res.send("success woot woot")
+})
+
 
 
 
@@ -49,6 +53,36 @@ app.get('/auth/facebook/callback',
   function(req, res) {
     res.redirect('/success');
   });
+
+
+/*  GITHUB AUTH  */
+
+const GitHubStrategy = require('passport-github').Strategy;
+
+const GITHUB_CLIENT_ID = "Iv1.9268d1048cb628b9"
+const GITHUB_CLIENT_SECRET = "b20472c738fd16777cd3591521e4a9e5adbc4957";
+
+passport.use(new GitHubStrategy({
+    clientID: GITHUB_CLIENT_ID,
+    clientSecret: GITHUB_CLIENT_SECRET,
+    callbackURL: "/auth/github/callback"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+      return cb(null, profile);
+  }
+));
+
+app.get('/auth/github',
+  passport.authenticate('github'));
+
+app.get('/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/error' }),
+  function(req, res) {
+    res.redirect('/success');
+  });
+
+
+// Port info
 
 const port = process.env.PORT || 3000;
 app.listen(port , () => console.log('App listening on port ' + port));
